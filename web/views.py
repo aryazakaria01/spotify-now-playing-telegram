@@ -26,8 +26,7 @@ class SpotifyCallback(tornado.web.RequestHandler):
             except:
                 self.write("spotify build user creds error")
             else:
-                user = User.get(telegram_id=callback_state)
-                if user:
+                if user := User.get(telegram_id=callback_state):
                     user.spotify_id = user_creds.id
                     user.spotify_access_token = user_creds.access_token
                     user.spotify_refresh_token = user_creds.refresh_token
@@ -49,7 +48,7 @@ class SpotifyCallback(tornado.web.RequestHandler):
                 if animation_id:
                     bot.sendAnimation(callback_state, animation_id)
                 bot.sendMessage(callback_state, bot_description)
-                self.redirect("https://t.me/" + bot.username)
+                self.redirect(f"https://t.me/{bot.username}")
 
         else:
             self.write("spotify no code")

@@ -25,16 +25,14 @@ def help(update, context):
 @orm.db_session
 def get_login_message(user_id):
     spotify = SpotifyClient()
-    if spotify.is_oauth_ready:
-        url = spotify.auth_uri(state=user_id)
-        reply_text = "Tap the button below to log in with your Spotify account"
-        reply_markup = InlineKeyboardMarkup(
-            inline_keyboard=[[Button(text="Login", url=url)]]
-        )
-        return reply_text, reply_markup
-    else:
-        reply_text = "There's something wrong"
-        return reply_text, None
+    if not spotify.is_oauth_ready:
+        return "There's something wrong", None
+    url = spotify.auth_uri(state=user_id)
+    reply_text = "Tap the button below to log in with your Spotify account"
+    reply_markup = InlineKeyboardMarkup(
+        inline_keyboard=[[Button(text="Login", url=url)]]
+    )
+    return reply_text, reply_markup
 
 
 def start(update, context):
@@ -153,10 +151,10 @@ def callback_query(update, context):
 
     try:
         user.spotify.add_to_queue(track_id)
-        logging.info("Add to queue " + track_id)
+        logging.info(f"Add to queue {track_id}")
         query.answer("Added to your queue", show_alert=False)
     except AuthError:
-        logging.error("Add to queue error " + track_id)
+        logging.error(f"Add to queue error {track_id}")
         text = (
             "Authorization needed, please login again.\nTo do so, text /start to {}"
         ).format(context.bot.name)
